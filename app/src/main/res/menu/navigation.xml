@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_list"
+        android:icon="@drawable/baseline_list_black_24dp"
+        android:title="List" />
+
+    <item
+        android:id="@+id/navigation_add"
+        android:icon="@drawable/baseline_add_black_24dp"
+        android:title="Add" />
+
+    <item
+        android:id="@+id/navigation_scanner"
+        android:icon="@drawable/baseline_crop_free_black_24dp"
+        android:title="Scanner" />
+
+</menu>

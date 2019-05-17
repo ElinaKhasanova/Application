@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "178192927026",
+    "firebase_url": "https://application-ddd05.firebaseio.com",
+    "project_id": "application-ddd05",
+    "storage_bucket": "application-ddd05.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178192927026:android:81bccdd4cf2d7dd5",
+        "android_client_info": {
+          "package_name": "com.example.elina.application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178192927026-6eag06444ral07u9ofvrujfpdvhu1fu4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.elina.application",
+            "certificate_hash": "76447b79c4530f855ea5296373d56bc382c5a3cf"
+          }
+        },
+        {
+          "client_id": "178192927026-5kgsi2s35g8ornor0sp8lntgl2irgmvk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAutuStr676-q1aRSvOSEp-qwddmlEPfI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178192927026-5kgsi2s35g8ornor0sp8lntgl2irgmvk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
