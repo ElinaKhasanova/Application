@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,15 +25,11 @@ import android.widget.Toast;
 
 import com.example.elina.application.R;
 import com.example.elina.application.activities.LoginActivity;
-import com.example.elina.application.model.Equipment;
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.example.elina.application.interfaces.AddView;
+import com.example.elina.application.presenters.AddPresenter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
@@ -50,13 +47,17 @@ import java.util.Locale;
 import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
+import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
-public class AddFragment extends Fragment implements View.OnClickListener{
+public class AddFragment extends Fragment
+                        implements View.OnClickListener, AddView{
 
     private EditText type, name, number, prodectionYear, location, nameResponsible;
     private Button createBtn,  addImageBtn;
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
+
+    private AddPresenter mAddPresenter;
 
     private ImageView imageViewPhoto;
 
@@ -122,67 +123,20 @@ public class AddFragment extends Fragment implements View.OnClickListener{
         super.onCreate(savedInstanceState);
 
         auth = FirebaseAuth.getInstance();
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        authListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user == null) {
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
-                }
-            }
-        };
+//        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        mAddPresenter = new AddPresenter(this);
+        mAddPresenter.init();
 
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.add_image_btn:
-                addPhoto();
-            case R.id.create_btn:
-                String typeOfE = type.getText().toString();
-                String nameOfE = name.getText().toString();
-                String numberOfE = number.getText().toString();
-                String prodectionYearOfE = prodectionYear.getText().toString();
-                String locationOfE = location.getText().toString();
-                String nameResponsibleOfE = nameResponsible.getText().toString();
-                String imageUrlFb = imageUri;
-                createNewEquipment(typeOfE,nameOfE, numberOfE,prodectionYearOfE,locationOfE,nameResponsibleOfE, imageUrlFb);
-        }
+    public void openLoginActivity() {
+        startActivity(new Intent(getActivity(), LoginActivity.class));
     }
 
-    private void createNewEquipment(final String type, String name, String number, String prodectionYear, String location, String nameResponsible, String imageUrl){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        CollectionReference newEquipRef = db.collection("objects");
-        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        Equipment equipment = new Equipment();
-        equipment.setType(type);
-        equipment.setName(name);
-        equipment.setNumber(number);
-        equipment.setProdectionYear(prodectionYear);
-        equipment.setLocation(location);
-        equipment.setNameResponsible(nameResponsible);
-        equipment.setEquip_id(UUID.randomUUID().toString());
-        equipment.setUser_id(userID);
-        equipment.setImage_url(imageUrl);
-
-        newEquipRef.document(equipment.getEquip_id()).set(equipment).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    Toast.makeText(getActivity(), "Success", Toast.LENGTH_LONG);
-                    clearFields();
-                } else{
-                    Toast.makeText(getActivity(), "Error.Please, try again", Toast.LENGTH_LONG);
-                }
-            }
-        });
-    }
-
-    private void clearFields(){
+    @Override
+    public void clearFields(){
         type.getText().clear();
         name.getText().clear();
         number.getText().clear();
@@ -191,6 +145,117 @@ public class AddFragment extends Fragment implements View.OnClickListener{
         nameResponsible.getText().clear();
         imageViewPhoto.setImageURI(null);
     }
+
+    @Override
+    public void makeToast(int i) {
+        switch (i){
+            case 1:
+                Toast.makeText(getActivity(), "Success", Toast.LENGTH_LONG);
+                break;
+            case 2:
+                Toast.makeText(getActivity(), "Error.Please, try again", Toast.LENGTH_LONG);
+                break;
+        }
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.add_image_btn:
+                addPhoto();
+                break;
+            case R.id.create_btn:
+                String typeOfE = type.getText().toString();
+                String nameOfE = name.getText().toString();
+                String numberOfE = number.getText().toString();
+                String prodectionYearOfE = prodectionYear.getText().toString();
+                String locationOfE = location.getText().toString();
+                String nameResponsibleOfE = nameResponsible.getText().toString();
+                String imageUrlFb = imageUri;
+                if (checkFields(typeOfE, nameOfE, numberOfE, prodectionYearOfE, locationOfE, nameResponsibleOfE, imageUrlFb)) {
+                    mAddPresenter.createEquip(typeOfE, nameOfE, numberOfE, prodectionYearOfE, locationOfE, nameResponsibleOfE, imageUrlFb);
+                }
+                break;
+        }
+    }
+
+    public boolean checkFields(final String type, String name, String number, String prodectionYear, String location, String nameResponsible, String imageUrl){
+        if (TextUtils.isEmpty(type) && TextUtils.isEmpty(name) && TextUtils.isEmpty(number) &&
+                TextUtils.isEmpty(prodectionYear) && TextUtils.isEmpty(location) && TextUtils.isEmpty(nameResponsible) &&
+                TextUtils.isEmpty(imageUrl)){
+            Toast.makeText(getActivity(), "Fill in all the fields and load photo.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(type) && TextUtils.isEmpty(name) && TextUtils.isEmpty(number) &&
+                TextUtils.isEmpty(prodectionYear) && TextUtils.isEmpty(location) && TextUtils.isEmpty(nameResponsible)){
+            Toast.makeText(getActivity(), "Fill in all the fields.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(type)){
+            Toast.makeText(getActivity(), "Type is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(name)){
+            Toast.makeText(getActivity(), "Type is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(number)){
+            Toast.makeText(getActivity(), "Type is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(prodectionYear)){
+            Toast.makeText(getActivity(), "Type is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(location)){
+            Toast.makeText(getActivity(), "Type is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(nameResponsible)){
+            Toast.makeText(getActivity(), "Type is required.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (TextUtils.isEmpty(imageUrl)){
+            Toast.makeText(getActivity(), "Please, add the photo.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+
+
+
+
+//    private void createNewEquipment(final String type, String name, String number, String prodectionYear, String location, String nameResponsible, String imageUrl){
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//        CollectionReference newEquipRef = db.collection("objects");
+//        String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+//
+//        Equipment equipment = new Equipment();
+//        equipment.setType(type);
+//        equipment.setName(name);
+//        equipment.setNumber(number);
+//        equipment.setProdectionYear(prodectionYear);
+//        equipment.setLocation(location);
+//        equipment.setNameResponsible(nameResponsible);
+//        equipment.setEquip_id(UUID.randomUUID().toString());
+//        equipment.setUser_id(userID);
+//        equipment.setImage_url(imageUrl);
+//
+//        newEquipRef.document(equipment.getEquip_id()).set(equipment).addOnCompleteListener(new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                if(task.isSuccessful()){
+//                    Toast.makeText(getActivity(), "Success", Toast.LENGTH_LONG);
+//                    clearFields();
+//                } else{
+//                    Toast.makeText(getActivity(), "Error.Please, try again", Toast.LENGTH_LONG);
+//                }
+//            }
+//        });
+//    }
 
     private void addPhoto() {
 

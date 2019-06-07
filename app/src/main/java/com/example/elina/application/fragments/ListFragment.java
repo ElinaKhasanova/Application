@@ -6,10 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +18,9 @@ import android.widget.Toast;
 
 import com.example.elina.application.R;
 import com.example.elina.application.activities.LoginActivity;
+import com.example.elina.application.interfaces.ListView;
 import com.example.elina.application.model.Equipment;
+import com.example.elina.application.presenters.ListPresenter;
 import com.example.elina.application.utils.EquipmentAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,9 +36,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.disposables.Disposable;
+public class ListFragment extends Fragment
+                        implements  ListView{
+    private ListPresenter mListPresenter;
 
-public class ListFragment extends Fragment {
     private TextView type_inv, name_inv, number_inv;
     private ImageView imageEquip;
     private RecyclerView recyclerView;
@@ -49,8 +50,6 @@ public class ListFragment extends Fragment {
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
     private DocumentSnapshot documentSnapshot;
-
-    private Disposable subscrible = null;
 
     public static final String USER_ID = "userId";
 
@@ -65,7 +64,8 @@ public class ListFragment extends Fragment {
         equipmentList = new ArrayList<>();
 
         initRecyclerView();
-        getAllEquipsOfUser();
+//        getAllEquipsOfUser();
+        mListPresenter.getAllEquipsOfUser();
 
         return view;
     }
@@ -74,18 +74,35 @@ public class ListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mListPresenter = new ListPresenter(this);
+
         auth = FirebaseAuth.getInstance();
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        authListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user == null) {
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
-                }
+//        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                authListener = new FirebaseAuth.AuthStateListener() {
+                    @Override
+                    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        if (user == null) {
+                            startActivity(new Intent(getActivity(), LoginActivity.class));
+                        }
             }
         };
+    }
 
+    @Override
+    public void addEquipmentToList(Equipment equipment) {
+        equipmentList.add(equipment);
+    }
+
+    @Override
+    public void setAdapter() {
+        adapter.equipmentList = equipmentList;
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void makeToast() {
+        Toast.makeText(getActivity(), "Query failed. Try again", Toast.LENGTH_LONG);
     }
 
     private void getAllEquipsOfUser(){
@@ -117,11 +134,38 @@ public class ListFragment extends Fragment {
         });
     }
 
+    private EquipmentAdapter.OnUserClickListener setRecyclerClickListener(){
+        EquipmentAdapter.OnUserClickListener onUserClickListener = new EquipmentAdapter.OnUserClickListener() {
+            @Override
+            public void onUserClick(Equipment equipment) {
+
+                DetailFragment detailFragment = new DetailFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("type", equipment.getType());
+                bundle.putString("name", equipment.getName());
+                bundle.putString("number", equipment.getNumber());
+                bundle.putString("year", equipment.getProdectionYear());
+                bundle.putString("location", equipment.getLocation());
+                bundle.putString("nameResp", equipment.getNameResponsible());
+                bundle.putString("equip_id", equipment.getEquip_id());
+                bundle.putString("user_id", equipment.getUser_id());
+                bundle.putString("date", equipment.getTimeStamp().toString());
+                bundle.putString("image_url", equipment.getImage_url());
+                detailFragment.setArguments(bundle);
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content,  detailFragment).commit();
+            }
+        };
+
+        return onUserClickListener;
+    }
+
+
+
     private void initRecyclerView(){
 //        EquipmentAdapter.OnUserClickListener onUserClickListener = new EquipmentAdapter.OnUserClickListener() {
 //            @Override
 //            public void onUserClick(Equipment equipment) {
-//                Toast.makeText(getActivity(), "equipment " + equipment.getEquip_id(), Toast.LENGTH_LONG).show();
 //
 //                DetailFragment detailFragment = new DetailFragment();
 //                Bundle bundle = new Bundle();
@@ -133,6 +177,7 @@ public class ListFragment extends Fragment {
 //                bundle.putString("nameResp", equipment.getNameResponsible());
 //                bundle.putString("equip_id", equipment.getEquip_id());
 //                bundle.putString("user_id", equipment.getUser_id());
+//                bundle.putString("date", equipment.getTimeStamp().toString());
 //                bundle.putString("image_url", equipment.getImage_url());
 //                detailFragment.setArguments(bundle);
 //                FragmentManager fragmentManager = getFragmentManager();
@@ -140,25 +185,8 @@ public class ListFragment extends Fragment {
 //            }
 //        };
 
-        subscrible = adapter.getClickEvent().subscribe(equipment -> {
-            DetailFragment detailFragment = new DetailFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("type", equipment.getType());
-            bundle.putString("name", equipment.getName());
-            bundle.putString("number", equipment.getNumber());
-            bundle.putString("year", equipment.getProdectionYear());
-            bundle.putString("location", equipment.getLocation());
-            bundle.putString("nameResp", equipment.getNameResponsible());
-            bundle.putString("equip_id", equipment.getEquip_id());
-            bundle.putString("user_id", equipment.getUser_id());
-            bundle.putString("image_url", equipment.getImage_url());
-            detailFragment.setArguments(bundle);
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content,  detailFragment).commit();
-        });
-
         if (adapter == null){
-            adapter = new EquipmentAdapter(getActivity(), equipmentList, subscrible);
+            adapter = new EquipmentAdapter(getActivity(), equipmentList, setRecyclerClickListener());
         }
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);

@@ -12,45 +12,48 @@ import android.widget.TextView;
 
 import com.example.elina.application.R;
 import com.example.elina.application.model.Equipment;
+import com.jakewharton.rxbinding.view.RxView;
 
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
+import rx.Observer;
 
 public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.ViewHolder> {
 
     private LayoutInflater inflater;
     public List<Equipment> equipmentList;
-
     private OnUserClickListener onUserClickListener;
-    private PublishSubject clickSubject = PublishSubject.create();
-    private Observable<Equipment> clickEvent = clickSubject;
+
+    private PublishSubject<View> mViewClickSubject = PublishSubject.create();
+
+    public Observable<View> getViewClickedObservable() {
+        return mViewClickSubject;
+    }
 
     public EquipmentAdapter() {
     }
 
-    public EquipmentAdapter(Context context, List<Equipment> equipmentList, Observable<Equipment> clickEvent) {
+    public EquipmentAdapter(Context context, List<Equipment> equipmentList, OnUserClickListener onUserClickListener) {
         this.equipmentList = equipmentList;
         this.inflater = LayoutInflater.from(context);
-        this.clickEvent = clickEvent;
+        this.onUserClickListener = onUserClickListener;
     }
-
-//    public EquipmentAdapter(Context context, List<Equipment> equipmentList, OnUserClickListener onUserClickListener) {
-//        this.equipmentList = equipmentList;
-//        this.inflater = LayoutInflater.from(context);
-//        this.onUserClickListener = onUserClickListener;
-//    }
-
-//    public Observable<Equipment> getEquipmentClickedObservable() {
-//        return subject.asObservable();
-//    }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.list_item, parent, false);
-        return new ViewHolder(view);
+
+        Context context = parent.getContext();
+        View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent,false);
+        ViewHolder viewHolder = new ViewHolder(view);
+
+//        RxView.clicks(view)
+//                .takeUntil(RxView.attaches(parent))
+//                .map(aVoid -> view)
+//                .
+        return viewHolder;
     }
 
     @Override
@@ -60,7 +63,6 @@ public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.View
         holder.name_tv.setText(equipment.getName());
         holder.number_tv.setText(equipment.getNumber());
         holder.image_iv.setImageURI(Uri.parse(equipment.getImage_url()));
-//        subject.onNext(position);
     }
 
     @Override
@@ -88,14 +90,9 @@ public class EquipmentAdapter extends RecyclerView.Adapter<EquipmentAdapter.View
                 @Override
                 public void onClick(View v) {
                     Equipment equipment = equipmentList.get(getLayoutPosition());
-//                    onUserClickListener.onUserClick(equipment);
-                    clickSubject.onNext(getLayoutPosition());
+                    onUserClickListener.onUserClick(equipment);
                 }
             });
         }
-    }
-
-    public Observable<Equipment> getClickEvent() {
-        return clickEvent;
     }
 }

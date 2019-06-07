@@ -8,59 +8,116 @@
     android:orientation="vertical"
     android:padding="@dimen/fui_auth_method_button_drawablePadding">
 
-    <ImageView
-        android:id="@+id/photo_iv"
-        android:layout_width="match_parent"
-        android:layout_height="100dp" />
-
-    <Button
-        android:id="@+id/add_image_btn"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add photo"/>
+        android:orientation="horizontal">
 
-    <EditText
-        android:id="@+id/type_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Type"/>
+        <ImageView
+            android:id="@+id/photo_iv"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
 
-    <EditText
-        android:id="@+id/name_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Name"/>
+        <Button
+            android:id="@+id/add_image_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add photo"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:background="@color/btn_add_photo"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"/>
 
-    <EditText
-        android:id="@+id/number_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Number"/>
+    </LinearLayout>
 
-    <EditText
-        android:id="@+id/prodectionYear_et"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Prodection Year"/>
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/location_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Location"/>
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/type_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type"
+            android:textSize="12sp"
+            android:textColor="@color/edit_text" />
+    </android.support.design.widget.TextInputLayout>
 
-    <EditText
-        android:id="@+id/nameResponsible_et"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Name Responsible"/>
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/name_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name"
+            android:textColor="@color/edit_text"
+            android:textSize="12sp"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/number_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Number"
+            android:textColor="@color/edit_text"
+            android:textSize="12sp"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/prodectionYear_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Prodection Year"
+            android:textColor="@color/edit_text"
+            android:textSize="12sp"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/location_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Location"
+            android:textColor="@color/edit_text"
+            android:textSize="12sp"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/nameResponsible_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Name Responsible"
+            android:textColor="@color/edit_text"
+            android:textSize="12sp"/>
+    </android.support.design.widget.TextInputLayout>
 
     <Button
         android:id="@+id/create_btn"
-        android:layout_width="fill_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
         android:background="@color/btn_login_register"
         android:text="Create"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        android:layout_gravity="center_horizontal"/>
+
 </LinearLayout>
